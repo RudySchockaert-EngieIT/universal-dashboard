@@ -44,7 +44,7 @@ namespace UniversalDashboard.Controllers
             _connectionManager = connectionManager;
         }
 
-        private async Task<IActionResult> RunScript(Endpoint endpoint, Dictionary<string, object> parameters = null, bool noSerialization = false)
+        private async Task<IActionResult> RunScript(AbstractEndpoint endpoint, Dictionary<string, object> parameters = null, bool noSerialization = false)
         {
             try {
                 var variables = new Dictionary<string, object> {
@@ -80,13 +80,10 @@ namespace UniversalDashboard.Controllers
                     executionContext.ConnectionId = connectionId;
                 }
 
-                return await Task.Run(() =>
-                {
-                    var result = _executionService.ExecuteEndpoint(executionContext, endpoint);
-                    var actionResult = ConvertToActionResult(result);
+                var result = await _executionService.ExecuteEndpointAsync(executionContext, endpoint);
+                var actionResult = ConvertToActionResult(result);
 
-                    return actionResult;
-                });
+                return actionResult;
             }
             catch (Exception ex) {
                 Log.Warn("RunScript() " + ex.Message + Environment.NewLine + ex.StackTrace);
